@@ -2,8 +2,13 @@ import streamlit            as st
 import pandas               as pd
 import numpy                as np
 from datetime               import timedelta
-from csv                    import writer
+import SessionState
 
+state = SessionState.get(entrada = {
+    'Peso do Paciente (kg)' : [],
+    'Dose (mCi)' : [],
+    'Hora da Aplicação' : [] 
+})
 
 
 elements = {'Tc99m':361.2,'I131':11520.0,'I123':780.0,'Ga67':4698.0,'Ga68':68110.0,'Tl201':4380.0,'F18':109.8}
@@ -34,30 +39,21 @@ calc = but3.button('Calcular')
 graph = but4.button('Gráfico')
 
 
-entrada = {
-'Elemento' : element,
-'Quantidade Inicial' : qtd0,
-'Hora Inicial' : hora0,
-'Peso do Paciente (kg)' : peso,
-'Dose (mCi)' : dose,
-'Hora da Aplicação' : horaApp 
-}
 
-data = pd.read_csv('data.csv')
+
+
 
 if add:
-    data = data.append(entrada, ignore_index=True)    
-    data.to_csv('data.csv', index=False)
+    state.entrada['Peso do Paciente (kg)'].append(peso)
+    state.entrada['Dose (mCi)'].append(dose)
+    state.entrada['Hora da Aplicação'].append(horaApp)
   
 if clearFile:
-    data = pd.DataFrame(columns=['Elemento', 'Quantidade Inicial', 'Hora Inicial', 'Peso do Paciente (kg)', 'Dose (mCi)', 'Hora da Aplicação'])
-    data.to_csv('data.csv', index=False)
-
-if calc:
-    print(data)
+    state.entrada = {
+        'Peso do Paciente (kg)' : [],
+        'Dose (mCi)' : [],
+        'Hora da Aplicação' : [] 
+    }
 
 my_expander = st.beta_expander("Dados:", expanded=True)
-my_expander.table(data[['Peso do Paciente (kg)', 'Dose (mCi)', 'Hora da Aplicação']])
-        
- 
-    
+table = my_expander.table(state.entrada)
